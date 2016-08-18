@@ -9,12 +9,17 @@
 /* Begin PBXBuildFile section */
 		0A3034961D61E0D70022B8E5 /* main.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A3034951D61E0D70022B8E5 /* main.m */; };
 		0A3034991D61E0D70022B8E5 /* AppDelegate.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A3034981D61E0D70022B8E5 /* AppDelegate.m */; };
-		0A30349C1D61E0D70022B8E5 /* ViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A30349B1D61E0D70022B8E5 /* ViewController.m */; };
 		0A30349F1D61E0D70022B8E5 /* Main.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0A30349D1D61E0D70022B8E5 /* Main.storyboard */; };
 		0A3034A11D61E0D70022B8E5 /* Assets.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 0A3034A01D61E0D70022B8E5 /* Assets.xcassets */; };
 		0A3034A41D61E0D70022B8E5 /* LaunchScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = 0A3034A21D61E0D70022B8E5 /* LaunchScreen.storyboard */; };
 		0A3034AF1D61E0D70022B8E5 /* KTDownloadManagerTests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A3034AE1D61E0D70022B8E5 /* KTDownloadManagerTests.m */; };
 		0A3034BA1D61E0D70022B8E5 /* KTDownloadManagerUITests.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A3034B91D61E0D70022B8E5 /* KTDownloadManagerUITests.m */; };
+		0A3034CE1D61E1260022B8E5 /* KTDownloadManager.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A3034C91D61E1260022B8E5 /* KTDownloadManager.m */; };
+		0A3034CF1D61E1260022B8E5 /* KTDownloadModel.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A3034CB1D61E1260022B8E5 /* KTDownloadModel.m */; };
+		0A3034D01D61E1260022B8E5 /* KTDownloadOperation.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A3034CD1D61E1260022B8E5 /* KTDownloadOperation.m */; };
+		0A33CB381D632CE2009317E7 /* DetailViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A33CB371D632CE2009317E7 /* DetailViewController.m */; };
+		0A33CB3B1D632CF7009317E7 /* RootTableViewController.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A33CB3A1D632CF7009317E7 /* RootTableViewController.m */; };
+		0A33CB481D633E7D009317E7 /* DownloadTableViewCell.m in Sources */ = {isa = PBXBuildFile; fileRef = 0A33CB471D633E7D009317E7 /* DownloadTableViewCell.m */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXContainerItemProxy section */
@@ -39,8 +44,6 @@
 		0A3034951D61E0D70022B8E5 /* main.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = main.m; sourceTree = "<group>"; };
 		0A3034971D61E0D70022B8E5 /* AppDelegate.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = AppDelegate.h; sourceTree = "<group>"; };
 		0A3034981D61E0D70022B8E5 /* AppDelegate.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = AppDelegate.m; sourceTree = "<group>"; };
-		0A30349A1D61E0D70022B8E5 /* ViewController.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; path = ViewController.h; sourceTree = "<group>"; };
-		0A30349B1D61E0D70022B8E5 /* ViewController.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = ViewController.m; sourceTree = "<group>"; };
 		0A30349E1D61E0D70022B8E5 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/Main.storyboard; sourceTree = "<group>"; };
 		0A3034A01D61E0D70022B8E5 /* Assets.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; path = Assets.xcassets; sourceTree = "<group>"; };
 		0A3034A31D61E0D70022B8E5 /* Base */ = {isa = PBXFileReference; lastKnownFileType = file.storyboard; name = Base; path = Base.lproj/LaunchScreen.storyboard; sourceTree = "<group>"; };
@@ -51,6 +54,18 @@
 		0A3034B51D61E0D70022B8E5 /* KTDownloadManagerUITests.xctest */ = {isa = PBXFileReference; explicitFileType = wrapper.cfbundle; includeInIndex = 0; path = KTDownloadManagerUITests.xctest; sourceTree = BUILT_PRODUCTS_DIR; };
 		0A3034B91D61E0D70022B8E5 /* KTDownloadManagerUITests.m */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.objc; path = KTDownloadManagerUITests.m; sourceTree = "<group>"; };
 		0A3034BB1D61E0D70022B8E5 /* Info.plist */ = {isa = PBXFileReference; lastKnownFileType = text.plist.xml; path = Info.plist; sourceTree = "<group>"; };
+		0A3034C81D61E1260022B8E5 /* KTDownloadManager.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KTDownloadManager.h; sourceTree = "<group>"; };
+		0A3034C91D61E1260022B8E5 /* KTDownloadManager.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KTDownloadManager.m; sourceTree = "<group>"; };
+		0A3034CA1D61E1260022B8E5 /* KTDownloadModel.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KTDownloadModel.h; sourceTree = "<group>"; };
+		0A3034CB1D61E1260022B8E5 /* KTDownloadModel.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KTDownloadModel.m; sourceTree = "<group>"; };
+		0A3034CC1D61E1260022B8E5 /* KTDownloadOperation.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = KTDownloadOperation.h; sourceTree = "<group>"; };
+		0A3034CD1D61E1260022B8E5 /* KTDownloadOperation.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = KTDownloadOperation.m; sourceTree = "<group>"; };
+		0A33CB361D632CE2009317E7 /* DetailViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DetailViewController.h; sourceTree = "<group>"; };
+		0A33CB371D632CE2009317E7 /* DetailViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DetailViewController.m; sourceTree = "<group>"; };
+		0A33CB391D632CF7009317E7 /* RootTableViewController.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = RootTableViewController.h; sourceTree = "<group>"; };
+		0A33CB3A1D632CF7009317E7 /* RootTableViewController.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = RootTableViewController.m; sourceTree = "<group>"; };
+		0A33CB461D633E7D009317E7 /* DownloadTableViewCell.h */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.h; path = DownloadTableViewCell.h; sourceTree = "<group>"; };
+		0A33CB471D633E7D009317E7 /* DownloadTableViewCell.m */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = sourcecode.c.objc; path = DownloadTableViewCell.m; sourceTree = "<group>"; };
 /* End PBXFileReference section */
 
 /* Begin PBXFrameworksBuildPhase section */
@@ -81,6 +96,7 @@
 		0A3034881D61E0D70022B8E5 = {
 			isa = PBXGroup;
 			children = (
+				0A3034C71D61E1260022B8E5 /* Classes */,
 				0A3034931D61E0D70022B8E5 /* KTDownloadManager */,
 				0A3034AD1D61E0D70022B8E5 /* KTDownloadManagerTests */,
 				0A3034B81D61E0D70022B8E5 /* KTDownloadManagerUITests */,
@@ -103,8 +119,12 @@
 			children = (
 				0A3034971D61E0D70022B8E5 /* AppDelegate.h */,
 				0A3034981D61E0D70022B8E5 /* AppDelegate.m */,
-				0A30349A1D61E0D70022B8E5 /* ViewController.h */,
-				0A30349B1D61E0D70022B8E5 /* ViewController.m */,
+				0A33CB361D632CE2009317E7 /* DetailViewController.h */,
+				0A33CB371D632CE2009317E7 /* DetailViewController.m */,
+				0A33CB391D632CF7009317E7 /* RootTableViewController.h */,
+				0A33CB3A1D632CF7009317E7 /* RootTableViewController.m */,
+				0A33CB461D633E7D009317E7 /* DownloadTableViewCell.h */,
+				0A33CB471D633E7D009317E7 /* DownloadTableViewCell.m */,
 				0A30349D1D61E0D70022B8E5 /* Main.storyboard */,
 				0A3034A01D61E0D70022B8E5 /* Assets.xcassets */,
 				0A3034A21D61E0D70022B8E5 /* LaunchScreen.storyboard */,
@@ -138,6 +158,19 @@
 				0A3034BB1D61E0D70022B8E5 /* Info.plist */,
 			);
 			path = KTDownloadManagerUITests;
+			sourceTree = "<group>";
+		};
+		0A3034C71D61E1260022B8E5 /* Classes */ = {
+			isa = PBXGroup;
+			children = (
+				0A3034C81D61E1260022B8E5 /* KTDownloadManager.h */,
+				0A3034C91D61E1260022B8E5 /* KTDownloadManager.m */,
+				0A3034CA1D61E1260022B8E5 /* KTDownloadModel.h */,
+				0A3034CB1D61E1260022B8E5 /* KTDownloadModel.m */,
+				0A3034CC1D61E1260022B8E5 /* KTDownloadOperation.h */,
+				0A3034CD1D61E1260022B8E5 /* KTDownloadOperation.m */,
+			);
+			path = Classes;
 			sourceTree = "<group>";
 		};
 /* End PBXGroup section */
@@ -207,6 +240,7 @@
 				TargetAttributes = {
 					0A3034901D61E0D70022B8E5 = {
 						CreatedOnToolsVersion = 7.3.1;
+						DevelopmentTeam = 2536D3J6MP;
 					};
 					0A3034A91D61E0D70022B8E5 = {
 						CreatedOnToolsVersion = 7.3.1;
@@ -270,9 +304,14 @@
 			isa = PBXSourcesBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				0A30349C1D61E0D70022B8E5 /* ViewController.m in Sources */,
+				0A3034D01D61E1260022B8E5 /* KTDownloadOperation.m in Sources */,
+				0A3034CE1D61E1260022B8E5 /* KTDownloadManager.m in Sources */,
+				0A3034CF1D61E1260022B8E5 /* KTDownloadModel.m in Sources */,
 				0A3034991D61E0D70022B8E5 /* AppDelegate.m in Sources */,
 				0A3034961D61E0D70022B8E5 /* main.m in Sources */,
+				0A33CB481D633E7D009317E7 /* DownloadTableViewCell.m in Sources */,
+				0A33CB3B1D632CF7009317E7 /* RootTableViewController.m in Sources */,
+				0A33CB381D632CE2009317E7 /* DetailViewController.m in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -364,7 +403,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				MTL_ENABLE_DEBUG_INFO = YES;
 				ONLY_ACTIVE_ARCH = YES;
 				SDKROOT = iphoneos;
@@ -403,7 +442,7 @@
 				GCC_WARN_UNINITIALIZED_AUTOS = YES_AGGRESSIVE;
 				GCC_WARN_UNUSED_FUNCTION = YES;
 				GCC_WARN_UNUSED_VARIABLE = YES;
-				IPHONEOS_DEPLOYMENT_TARGET = 9.3;
+				IPHONEOS_DEPLOYMENT_TARGET = 7.0;
 				MTL_ENABLE_DEBUG_INFO = NO;
 				SDKROOT = iphoneos;
 				TARGETED_DEVICE_FAMILY = "1,2";
@@ -415,10 +454,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = KTDownloadManager/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.kevin.ting.KTDownloadManager;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 			};
 			name = Debug;
 		};
@@ -426,10 +468,13 @@
 			isa = XCBuildConfiguration;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
+				CODE_SIGN_IDENTITY = "iPhone Developer";
+				"CODE_SIGN_IDENTITY[sdk=iphoneos*]" = "iPhone Developer";
 				INFOPLIST_FILE = KTDownloadManager/Info.plist;
 				LD_RUNPATH_SEARCH_PATHS = "$(inherited) @executable_path/Frameworks";
 				PRODUCT_BUNDLE_IDENTIFIER = com.kevin.ting.KTDownloadManager;
 				PRODUCT_NAME = "$(TARGET_NAME)";
+				PROVISIONING_PROFILE = "";
 			};
 			name = Release;
 		};
@@ -498,6 +543,7 @@
 				0A3034C01D61E0D70022B8E5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		0A3034C11D61E0D70022B8E5 /* Build configuration list for PBXNativeTarget "KTDownloadManagerTests" */ = {
 			isa = XCConfigurationList;
@@ -506,6 +552,7 @@
 				0A3034C31D61E0D70022B8E5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 		0A3034C41D61E0D70022B8E5 /* Build configuration list for PBXNativeTarget "KTDownloadManagerUITests" */ = {
 			isa = XCConfigurationList;
@@ -514,6 +561,7 @@
 				0A3034C61D61E0D70022B8E5 /* Release */,
 			);
 			defaultConfigurationIsVisible = 0;
+			defaultConfigurationName = Release;
 		};
 /* End XCConfigurationList section */
 	};

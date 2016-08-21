@@ -25,7 +25,7 @@ typedef NS_ENUM(NSUInteger, KTDownloadState)
 // 以下代理方法在operation存在并且在下载的时候才会调用
 @optional
 - (void)downloadModel:(KTDownloadModel *)model didChangedState:(KTDownloadState)state;
-- (void)downloadModel:(KTDownloadModel *)model didReceivedBytes:(int64_t)receivedBytes totalBytes:(int64_t)totalBytes;
+- (void)downloadModel:(KTDownloadModel *)model didReceivedTotalBytes:(int64_t)totalReceivedBytes totalBytes:(int64_t)totalBytes;
 
 @end
 
@@ -34,12 +34,14 @@ typedef NS_ENUM(NSUInteger, KTDownloadState)
 @interface KTDownloadModel : NSObject
 
 // 下载的url
-@property (nonatomic, strong) NSURL *url;
+@property (nonatomic, strong, readonly) NSURL *url;
 // 下载的文件全路径，可以指定，必须处于Documents或者Library/Caches文件夹下面
 // 如果为nil，那么下载完成之后使用KTDownloadManager的downloadFolderPath配合suggest name构成文件全路径
 @property (nonatomic, copy) NSString *downloadFilePath;
-// 已接收的字节数
-@property (nonatomic, assign) int64_t receivedBytes;
+// 已接收的总字节数
+@property (nonatomic, assign) int64_t totalReceivedBytes;
+// 当前接收的data，由于存在断点续传，只表示这一次下载的data，并不表示下载的总data
+@property (nonatomic, strong) NSMutableData *receivedData;
 // 总字节数
 @property (nonatomic, assign) int64_t totalBytes;
 // 下载状态
@@ -52,9 +54,12 @@ typedef NS_ENUM(NSUInteger, KTDownloadState)
 @property (nonatomic, strong) NSError *error;
 
 - (instancetype)initWithDict:(NSDictionary *)dict;
+- (instancetype)initWithUrl:(NSURL *)url;
+- (instancetype)init NS_UNAVAILABLE;
 - (NSDictionary *)dict;
-- (NSData *)readResumeData;
-- (void)saveResumeData:(NSData *)data;
-- (void)removeResumeData;
+- (NSData *)readTotalReceivedDate;
+- (void)saveReceivedData:(NSData *)data;
+- (void)saveReceivedData:(NSData *)data toFile:(NSString *)file;
+- (void)removeTotalReceivedData;
 
 @end

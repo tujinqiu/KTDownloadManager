@@ -10,28 +10,7 @@
 
 static NSString * const KTDownloadModelsPlistFilePath = @"com.KTDownloadManager.default/models.plist";
 
-@interface NSArray (KTDownloadOperation)
-
-- (KTDownloadOperation *)operationForDownloadTask:(NSURLSessionDownloadTask *)task;
-
-@end
-
-@implementation NSArray (KTDownloadOperation)
-
-- (KTDownloadOperation *)operationForDownloadTask:(NSURLSessionDownloadTask *)task
-{
-    for (KTDownloadOperation *op in self) {
-        if (op.downloadTask == task) {
-            return op;
-        }
-    }
-    
-    return nil;
-}
-
-@end
-
-@interface KTDownloadManager ()<NSURLSessionDownloadDelegate>
+@interface KTDownloadManager ()<NSURLSessionDataDelegate>
 
 // 下载队列，默认并发下载数量maxConcurrentOperationCount为3
 @property (nonatomic, strong, readonly) NSOperationQueue *downloadQueue;
@@ -98,7 +77,6 @@ static NSString * const KTDownloadModelsPlistFilePath = @"com.KTDownloadManager.
     NSMutableArray *array = [NSMutableArray array];
     for (KTDownloadModel *model in downloadModels) {
         if (model.state == KTDownloadStateWaiting || model.state == KTDownloadStateDownloading) {
-            [model.operation cancel];
             model.state = KTDownloadStatePaused;
         }
         NSDictionary *dict = [model dict];
@@ -106,6 +84,10 @@ static NSString * const KTDownloadModelsPlistFilePath = @"com.KTDownloadManager.
     }
     NSString *cachePath = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) firstObject];
     NSString *plistFilePath = [cachePath stringByAppendingPathComponent:KTDownloadModelsPlistFilePath];
+    NSString *plistFolder = [plistFilePath stringByDeletingLastPathComponent];
+    if (![[NSFileManager defaultManager] fileExistsAtPath:plistFolder]) {
+        [[NSFileManager defaultManager] createDirectoryAtPath:plistFolder withIntermediateDirectories:YES attributes:nil error:nil];
+    }
     [array writeToFile:plistFilePath atomically:YES];
 }
 
@@ -120,19 +102,9 @@ static NSString * const KTDownloadModelsPlistFilePath = @"com.KTDownloadManager.
         [self.downloadModels insertObject:model atIndex:0];
     }
     if (model.state == KTDownloadStateWaiting ||
-        model.state == KTDownloadStateDownloading) {
+        model.state == KTDownloadStateDownloading ||
+        model.state == KTDownloadStateFinished) {
         return;
-    }
-    if (model.state == KTDownloadStateFinished) {
-        NSFileManager *manager = [NSFileManager defaultManager];
-        NSError *error = nil;
-        [manager removeItemAtPath:model.downloadFilePath error:&error];
-        if (error) {
-            model.error = error;
-            model.state = KTDownloadStateFailed;
-            
-            return;
-        }
     }
     NSOperation *op = [[KTDownloadOperation alloc] initWithDownloadModel:model session:self.session downloadFolderPath:self.downloadFolderPath];
     [self.downloadQueue addOperation:op];
@@ -162,7 +134,7 @@ static NSString * const KTDownloadModelsPlistFilePath = @"com.KTDownloadManager.
 - (void)removeDownloadModel:(KTDownloadModel *)model
 {
     [self cancelDownloadModel:model];
-    [model removeResumeData];
+    [model removeTotalReceivedData];
     [self.downloadModels removeObject:model];
 }
 
@@ -220,37 +192,18 @@ static NSString * const KTDownloadModelsPlistFilePath = @"com.KTDownloadManager.
     return _downloadQueue.maxConcurrentOperationCount;
 }
 
-#pragma mark -- NSURLSessionDownloadDelegate --
+#pragma mark -- NSURLSessionDataDelegate --
 
-- (void)URLSession:(NSURLSession *)session downloadTask:(NSURLSessionDownloadTask *)downloadTask
-didFinishDownloadingToURL:(NSURL *)location
+- (void)URLSession:(NSURLSession *)session dataTask:(NSURLSessionDataTask *)dataTask
+    didReceiveData:(NSData *)data
 {
-    KTDownloadOperation *op = [self.downloadQueue.operations operationForDownloadTask:downloadTask];
-    [op URLSession:session downloadTask:downloadTask didFinishDownloadingToURL:location];
-}
-
-- (void)URLSession:(NSURLSession *)session downloadTask:(NSURLSessionDownloadTask *)downloadTask
-      didWriteData:(int64_t)bytesWritten
- totalBytesWritten:(int64_t)totalBytesWritten
-totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite
-{
-    KTDownloadOperation *op = [self.downloadQueue.operations operationForDownloadTask:downloadTask];
-    [op URLSession:session downloadTask:downloadTask didWriteData:bytesWritten totalBytesWritten:totalBytesWritten totalBytesExpectedToWrite:totalBytesExpectedToWrite];
-}
-
-- (void)URLSession:(NSURLSession *)session downloadTask:(NSURLSessionDownloadTask *)downloadTask
- didResumeAtOffset:(int64_t)fileOffset
-expectedTotalBytes:(int64_t)expectedTotalBytes
-{
-    KTDownloadOperation *op = [self.downloadQueue.operations operationForDownloadTask:downloadTask];
-    [op URLSession:session downloadTask:downloadTask didResumeAtOffset:fileOffset expectedTotalBytes:expectedTotalBytes];
+    [dataTask.downloadOperation URLSession:session dataTask:dataTask didReceiveData:data];
 }
 
 - (void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task
 didCompleteWithError:(nullable NSError *)error
 {
-    KTDownloadOperation *op = [self.downloadQueue.operations operationForDownloadTask:(NSURLSessionDownloadTask *)task];
-    [op URLSession:session task:task didCompleteWithError:error];
+    [task.downloadOperation URLSession:session task:task didCompleteWithError:error];
 }
 
 @end

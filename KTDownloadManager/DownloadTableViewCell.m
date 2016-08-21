@@ -32,7 +32,7 @@
     NSLog(@"state:%lu", (unsigned long)state);
     float progress = 0.0;
     if (model.totalBytes > 0) {
-        progress = (float)model.receivedBytes / (float)model.totalBytes;
+        progress = (float)model.totalReceivedBytes / (float)model.totalBytes;
     }
     NSString *size = nil;
     if (model.totalBytes / 1024 < 1024) {
@@ -99,9 +99,9 @@
     [self configWithModel:model state:state];
 }
 
-- (void)downloadModel:(KTDownloadModel *)model didReceivedBytes:(int64_t)receivedBytes totalBytes:(int64_t)totalBytes
+- (void)downloadModel:(KTDownloadModel *)model didReceivedTotalBytes:(int64_t)totalReceivedBytes totalBytes:(int64_t)totalBytes
 {
-    self.progressView.progress = (float)receivedBytes / (float)totalBytes;
+    self.progressView.progress = (float)totalReceivedBytes / (float)totalBytes;
     NSString *size = nil;
     if (model.totalBytes / 1024 < 1024) {
         size = [NSString stringWithFormat:@"%lldKB", model.totalBytes / 1024];

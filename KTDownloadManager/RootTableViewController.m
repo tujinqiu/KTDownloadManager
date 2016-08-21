@@ -31,18 +31,12 @@
     self.downloadModels = [[KTDownloadManager sharedManager] getDownloadModels];
     if (self.downloadModels.count <= 0) {
         // 添加几个示例下载(全部是github上的公共项目)
-        KTDownloadModel *model1 = [[KTDownloadModel alloc] init];
-        model1.url = [NSURL URLWithString:@"https://codeload.github.com/MengTo/DesignerNewsApp/zip/master"];
-        KTDownloadModel *model2 = [[KTDownloadModel alloc] init];
-        model2.url = [NSURL URLWithString:@"https://codeload.github.com/hanton/HTY360Player/zip/master"];
-        KTDownloadModel *model3 = [[KTDownloadModel alloc] init];
-        model3.url = [NSURL URLWithString:@"https://codeload.github.com/austinzheng/iOS-2048/zip/master"];
-        KTDownloadModel *model4 = [[KTDownloadModel alloc] init];
-        model4.url = [NSURL URLWithString:@"https://codeload.github.com/aclissold/the-oakland-post/zip/master"];
-        KTDownloadModel *model5 = [[KTDownloadModel alloc] init];
-        model5.url = [NSURL URLWithString:@"https://codeload.github.com/bennyguitar/News-YC---iPhone/zip/master"];
-        KTDownloadModel *model6 = [[KTDownloadModel alloc] init];
-        model6.url = [NSURL URLWithString:@"https://codeload.github.com/Coding/Coding-iOS/zip/master"];
+        KTDownloadModel *model1 = [[KTDownloadModel alloc] initWithUrl:[NSURL URLWithString:@"https://nj02all01.baidupcs.com/file/03a6d53a1816ffe4bc61989af96ae8ca?bkt=p3-00002b6c4fd69b62bd76de416911e033a448&fid=3238670166-250528-876280113316255&time=1471662986&sign=FDTAXGERLBH-DCb740ccc5511e5e8fedcff06b081203-R0VzZlYfdi9YRYTHFhyUrtVu2Og%3D&to=nj2hb&fm=Yan,B,T,t&sta_dx=31082932&sta_cs=1&sta_ft=zip&sta_ct=4&sta_mt=4&fm2=Yangquan,B,T,t&newver=1&newfm=1&secfm=1&flow_ver=3&pkey=00002b6c4fd69b62bd76de416911e033a448&sl=75038799&expires=8h&rt=sh&r=546480087&mlogid=5391629881511995899&vuk=3238670166&vbdid=1194279313&fin=Eleven-master.zip&fn=Eleven-master.zip&slt=pm&uta=0&rtype=1&iv=0&isw=0&dp-logid=5391629881511995899&dp-callid=0.1.1&hps=1"]];
+        KTDownloadModel *model2 = [[KTDownloadModel alloc] initWithUrl:[NSURL URLWithString:@"https://codeload.github.com/hanton/HTY360Player/zip/master"]];
+        KTDownloadModel *model3 = [[KTDownloadModel alloc] initWithUrl:[NSURL URLWithString:@"https://codeload.github.com/austinzheng/iOS-2048/zip/master"]];
+        KTDownloadModel *model4 = [[KTDownloadModel alloc] initWithUrl:[NSURL URLWithString:@"https://codeload.github.com/aclissold/the-oakland-post/zip/master"]];
+        KTDownloadModel *model5 = [[KTDownloadModel alloc] initWithUrl:[NSURL URLWithString:@"https://codeload.github.com/bennyguitar/News-YC---iPhone/zip/master"]];
+        KTDownloadModel *model6 = [[KTDownloadModel alloc] initWithUrl:[NSURL URLWithString:@"https://codeload.github.com/Coding/Coding-iOS/zip/master"]];
         self.downloadModels = @[model1, model2, model3, model4, model5, model6];
     }
 }
@@ -56,17 +50,16 @@
 {
     UIAlertController *alert = [UIAlertController alertControllerWithTitle:@"添加下载" message:nil preferredStyle:UIAlertControllerStyleAlert];
     KTDownloadManager *manager = [KTDownloadManager sharedManager];
-    KTDownloadModel *model = [[KTDownloadModel alloc] init];
     UIAlertAction *action1 = [UIAlertAction actionWithTitle:@"HackerNewsReader" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-        model.url = [NSURL URLWithString:@"https://codeload.github.com/rnystrom/HackerNewsReader/zip/master"];
+        KTDownloadModel *model = [[KTDownloadModel alloc] initWithUrl:[NSURL URLWithString:@"https://codeload.github.com/rnystrom/HackerNewsReader/zip/master"]];
         [self testDownloadedModel:model withDownloadManager:manager];
     }];
     UIAlertAction *action2 = [UIAlertAction actionWithTitle:@"duckduckgo" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-        model.url = [NSURL URLWithString:@"https://codeload.github.com/duckduckgo/ios/zip/master"];
+        KTDownloadModel *model = [[KTDownloadModel alloc] initWithUrl:[NSURL URLWithString:@"https://codeload.github.com/duckduckgo/ios/zip/master"]];
         [self testDownloadedModel:model withDownloadManager:manager];
     }];
     UIAlertAction *action3 = [UIAlertAction actionWithTitle:@"wh-app-ios" style:UIAlertActionStyleDefault handler:^(UIAlertAction * _Nonnull action) {
-        model.url = [NSURL URLWithString:@"https://codeload.github.com/WhiteHouse/wh-app-ios/zip/master"];
+        KTDownloadModel *model = [[KTDownloadModel alloc] initWithUrl:[NSURL URLWithString:@"https://codeload.github.com/WhiteHouse/wh-app-ios/zip/master"]];
         [self testDownloadedModel:model withDownloadManager:manager];
     }];
     UIAlertAction *action4 = [UIAlertAction actionWithTitle:@"取消" style:UIAlertActionStyleCancel handler:nil];

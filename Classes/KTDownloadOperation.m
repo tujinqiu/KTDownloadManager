@@ -7,13 +7,16 @@
 //
 
 #import "KTDownloadOperation.h"
+#import <objc/runtime.h>
 
 @interface KTDownloadOperation ()
 
+@property (nonatomic, strong, readonly) NSURLSessionDataTask *dataTask;
 @property (nonatomic, copy) NSString *downloadFolderPath;
 @property (nonatomic, weak) NSURLSession *session;
 @property (assign, nonatomic, getter = isExecuting) BOOL executing;
 @property (assign, nonatomic, getter = isFinished) BOOL finished;
+@property (nonatomic, strong) NSMutableData *receivedData;
 
 @end
 
@@ -40,23 +43,24 @@
 - (void)start
 {
     if (self.isCancelled) {
-        self.downloadModel.state = KTDownloadStatePaused;
+        // 避免self dealloc了，导致block代码执行无效
+        KTDownloadModel *model = self.downloadModel;
+        dispatch_async(dispatch_get_main_queue(), ^{
+            model.state = KTDownloadStatePaused;
+        });
         [self exit];
         
         return;
     }
     self.executing = YES;
     self.finished = NO;
-    NSData *resumeData = [self.downloadModel readResumeData];
-    if (!resumeData) {
-        NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:self.downloadModel.url];
-        [request addValue:@"" forHTTPHeaderField:@"Accept-Encoding"];
-        _downloadTask = [self.session downloadTaskWithRequest:request];
-    }
-    else {
-        _downloadTask = [self.session downloadTaskWithResumeData:resumeData];
-    }
-    [_downloadTask resume];
+    NSData *resumeData = [self.downloadModel readTotalReceivedDate];
+    NSMutableURLRequest *request = [NSMutableURLRequest requestWithURL:self.downloadModel.url];
+    [request setValue:[NSString stringWithFormat:@"%lu-", (unsigned long)resumeData.length] forHTTPHeaderField:@"range"];
+    [request addValue:@"" forHTTPHeaderField:@"Accept-Encoding"];
+    _dataTask = [self.session dataTaskWithRequest:request];
+    _dataTask.downloadOperation = self;
+    [_dataTask resume];
     dispatch_async(dispatch_get_main_queue(), ^{
         self.downloadModel.state = KTDownloadStateDownloading;
     });
@@ -67,18 +71,7 @@
     [super cancel];
     
     if (self.downloadModel.state == KTDownloadStateDownloading) {
-        if (self.cancelToRemove) {
-            [self.downloadTask cancel];
-        }
-        else {
-            __weak __typeof(self) weakSelf = self;
-            [self.downloadTask cancelByProducingResumeData:^(NSData * _Nullable resumeData) {
-                NSLog(@"produce resumedata");
-                [weakSelf.downloadModel saveResumeData:resumeData];
-            }];
-        }
-        self.downloadModel.state = KTDownloadStatePaused;
-        [self exit];
+        [self.dataTask cancel];
     }
 }
 
@@ -86,66 +79,61 @@
 {
     self.executing = NO;
     self.finished = YES;
-    _downloadTask = nil;
+    _dataTask = nil;
 }
 
-#pragma mark -- NSURLSessionDownloadDelegate --
+#pragma mark -- NSURLSessionDataDelegate --
 
-- (void)URLSession:(NSURLSession *)session downloadTask:(NSURLSessionDownloadTask *)downloadTask
-didFinishDownloadingToURL:(NSURL *)location
+- (void)URLSession:(NSURLSession *)session dataTask:(NSURLSessionDataTask *)dataTask
+    didReceiveData:(NSData *)data
 {
-    if (!self.downloadModel.downloadFilePath) {
-        self.downloadModel.downloadFilePath = [self.downloadFolderPath stringByAppendingPathComponent:[downloadTask.response suggestedFilename]];
-    }
-    NSFileManager *fileManager = [NSFileManager defaultManager];
-    NSError *error = nil;
-    NSString *folder = [self.downloadModel.downloadFilePath stringByDeletingLastPathComponent];
-    if (![fileManager fileExistsAtPath:folder]) {
-        [fileManager createDirectoryAtPath:folder withIntermediateDirectories:YES attributes:nil error:nil];
-    }
-    [fileManager removeItemAtPath:self.downloadModel.downloadFilePath error:nil];
-    [fileManager moveItemAtURL:location toURL:[NSURL fileURLWithPath:self.downloadModel.downloadFilePath] error:&error];
-    NSLog(@"error:%@", error);
+    self.downloadModel.totalBytes = [dataTask.response expectedContentLength];
+    [self.receivedData appendData:data];
+    dispatch_async(dispatch_get_main_queue(), ^{
+        self.downloadModel.totalReceivedBytes += data.length;
+    });
+}
+
+- (void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task
+didCompleteWithError:(nullable NSError *)error
+{
     // 避免self dealloc了，导致block代码执行无效
     KTDownloadModel *model = self.downloadModel;
-    dispatch_async(dispatch_get_main_queue(), ^{
-        model.state = KTDownloadStateFinished;
-    });
-}
-
-- (void)URLSession:(NSURLSession *)session downloadTask:(NSURLSessionDownloadTask *)downloadTask
-      didWriteData:(int64_t)bytesWritten
- totalBytesWritten:(int64_t)totalBytesWritten
-totalBytesExpectedToWrite:(int64_t)totalBytesExpectedToWrite
-{
-    dispatch_async(dispatch_get_main_queue(), ^{
-        self.downloadModel.totalBytes = totalBytesExpectedToWrite;
-        self.downloadModel.receivedBytes = totalBytesWritten;
-    });
-}
-
-- (void)URLSession:(NSURLSession *)session downloadTask:(NSURLSessionDownloadTask *)downloadTask
- didResumeAtOffset:(int64_t)fileOffset
-expectedTotalBytes:(int64_t)expectedTotalBytes
-{
-    dispatch_async(dispatch_get_main_queue(), ^{
-        self.downloadModel.totalBytes = expectedTotalBytes;
-        self.downloadModel.receivedBytes = fileOffset;
-    });
-}
-
-- (void)URLSession:(NSURLSession *)session task:(NSURLSessionTask *)task didCompleteWithError:(nullable NSError *)error
-{
     if (error) {
-        NSData *resumeData = [error.userInfo objectForKey:NSURLSessionDownloadTaskResumeData];
-        if (resumeData) {
-            [self.downloadModel saveResumeData:resumeData];
+        if (error.code == NSURLErrorCancelled) {
+            if (!self.cancelToRemove) {
+                NSHTTPURLResponse *response = (NSHTTPURLResponse *)task.response;
+                NSString *acceptRange = [response.allHeaderFields objectForKey:@"Accept-Range"];
+                if (acceptRange && ![acceptRange isEqualToString:@"none"]) {
+                    // 保存下载数据
+                    [self.downloadModel saveReceivedData:self.receivedData];
+                }
+                dispatch_async(dispatch_get_main_queue(), ^{
+                    model.state = KTDownloadStatePaused;
+                });
+            }
         }
-        // 避免self dealloc了，导致block代码执行无效
-        KTDownloadModel *model = self.downloadModel;
+        else {
+            dispatch_async(dispatch_get_main_queue(), ^{
+                model.error = error;
+                model.state = KTDownloadStateFailed;
+            });
+        }
+    }
+    else {
+        // 保存到指定文件
+        NSString *file = nil;
+        if (model.downloadFilePath.length > 0) {
+            file = model.downloadFilePath;
+        }
+        else {
+            NSString *suggestFileName = [task.response suggestedFilename];
+            file = [self.downloadFolderPath stringByAppendingPathComponent:suggestFileName];
+            model.downloadFilePath = file;
+        }
+        [model saveReceivedData:self.receivedData toFile:file];
         dispatch_async(dispatch_get_main_queue(), ^{
-            model.error = error;
-            model.state = KTDownloadStateFailed;
+            model.state = KTDownloadStateFinished;
         });
     }
     [self exit];
@@ -173,6 +161,38 @@ expectedTotalBytes:(int64_t)expectedTotalBytes
     [self willChangeValueForKey:@"isExecuting"];
     _executing = executing;
     [self didChangeValueForKey:@"isExecuting"];
+}
+
+- (NSMutableData *)receivedData
+{
+    if (!_receivedData) {
+        _receivedData = [NSMutableData data];
+    }
+    
+    return _receivedData;
+}
+
+@end
+
+
+
+@implementation NSURLSessionTask (KTDownloadOperation)
+
+static char NSURLSessionTaskDownloadOperationKey = '\0';
+
+- (void)setDownloadOperation:(id)downloadOperation
+{
+    if (!downloadOperation) {
+        return;
+    }
+    [self willChangeValueForKey:@"downloadOperation"];
+    objc_setAssociatedObject(self, &NSURLSessionTaskDownloadOperationKey, downloadOperation, OBJC_ASSOCIATION_ASSIGN);
+    [self didChangeValueForKey:@"downloadOperation"];
+}
+
+- (id)downloadOperation
+{
+    return objc_getAssociatedObject(self, &NSURLSessionTaskDownloadOperationKey);
 }
 
 @end

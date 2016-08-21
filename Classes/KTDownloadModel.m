@@ -13,24 +13,31 @@ static NSString * const KTDownloadModelsDataPath = @"com.KTDownloadManager.defau
 
 @implementation KTDownloadModel
 
+- (instancetype)initWithUrl:(NSURL *)url
+{
+    if (self = [super init]) {
+        _url = url;
+    }
+    
+    return self;
+}
+
 - (instancetype)initWithDict:(NSDictionary *)dict
 {
     if (self = [super init]) {
         _url = [NSURL URLWithString:[dict objectForKey:@"url"]];
+        NSUInteger folderType = [[dict objectForKey:@"folderType"] unsignedIntegerValue];
         NSString *path = [dict objectForKey:@"downloadFilePath"];
-        BOOL pathCorrect1 = [path hasPrefix:@"Documents/"];
-        BOOL pathCorrect2 = [path hasPrefix:@"Library/Caches/"];
-        NSAssert(path.length == 0 || pathCorrect1 || pathCorrect2, @"downloadFilePath必须是处于Documents或者Library/Caches文件夹下");
-        if (pathCorrect1) {
+        if (folderType == 1) {
             NSString *docPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject];
             _downloadFilePath = [[docPath stringByDeletingLastPathComponent] stringByAppendingPathComponent:path];
         }
-        if (pathCorrect2) {
+        else if (folderType == 2) {
             NSString *cachesPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject];
-            _downloadFilePath = [[cachesPath stringByReplacingOccurrencesOfString:@"Library/Caches" withString:@""] stringByAppendingPathComponent:path];
+            _downloadFilePath = [cachesPath stringByAppendingPathComponent:path];
         }
         _state = [[dict objectForKey:@"state"] unsignedIntegerValue];
-        _receivedBytes = [[dict objectForKey:@"receivedBytes"] unsignedIntegerValue];
+        _totalReceivedBytes = [[dict objectForKey:@"totalReceivedBytes"] unsignedIntegerValue];
         _totalBytes = [[dict objectForKey:@"totalBytes"] unsignedIntegerValue];
     }
     
@@ -42,33 +49,31 @@ static NSString * const KTDownloadModelsDataPath = @"com.KTDownloadManager.defau
     NSString *path = @"";
     NSString *docPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject];
     NSString *cachesPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject];
+    NSUInteger folderType = 0;
     if ([self.downloadFilePath hasPrefix:docPath]) {
+        folderType = 1;
         path = [self.downloadFilePath stringByReplacingOccurrencesOfString:[NSString stringWithFormat:@"%@/", docPath] withString:@""];
     }
     else if ([self.downloadFilePath hasPrefix:cachesPath]) {
+        folderType = 2;
         path = [self.downloadFilePath stringByReplacingOccurrencesOfString:[NSString stringWithFormat:@"%@/", cachesPath] withString:@""];
     }
     return @{@"url" : _url.absoluteString,
              @"downloadFilePath" : path,
              @"state" : [NSNumber numberWithUnsignedInteger:self.state],
-             @"receivedBytes" : [NSNumber numberWithLongLong:self.receivedBytes],
-             @"totalBytes" : [NSNumber numberWithLongLong:self.totalBytes]};
+             @"totalReceivedBytes" : [NSNumber numberWithLongLong:self.totalReceivedBytes],
+             @"totalBytes" : [NSNumber numberWithLongLong:self.totalBytes],
+             @"folderType" : [NSNumber numberWithUnsignedInteger:folderType]};
 }
 
-- (void)setDownloadFilePath:(NSString *)downloadFilePath
-{
-    NSString *docPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject];
-    NSString *cachesPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject];
-    BOOL pathCorrect = [downloadFilePath hasPrefix:docPath] || [downloadFilePath hasPrefix:cachesPath];
-    NSAssert(pathCorrect, @"downloadFilePath必须是处于Documents或者Library/Caches文件夹下");
-    _downloadFilePath = downloadFilePath;
-}
-
-- (NSData *)readResumeData
+- (NSData *)readTotalReceivedDate
 {
     NSString *cachesPath = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) firstObject];
     NSString *dataFile = [NSString stringWithFormat:@"%@/%@/%@", cachesPath, KTDownloadModelsDataPath, [self cachedFileNameForKey:_url.absoluteString]];
-    return [NSData dataWithContentsOfFile:dataFile];
+    NSData *data = [NSData dataWithContentsOfFile:dataFile];
+    _totalReceivedBytes = data.length;
+    
+    return data;
 }
 
 - (NSString *)cachedFileNameForKey:(NSString *)key {
@@ -85,7 +90,12 @@ static NSString * const KTDownloadModelsDataPath = @"com.KTDownloadManager.defau
     return filename;
 }
 
-- (void)saveResumeData:(NSData *)data
+- (void)saveReceivedData:(NSData *)data
+{
+    [self saveReceivedData:data toFile:nil];
+}
+
+- (void)saveReceivedData:(NSData *)data toFile:(NSString *)file
 {
     if (!data) {
         return;
@@ -97,18 +107,31 @@ static NSString * const KTDownloadModelsDataPath = @"com.KTDownloadManager.defau
         [manager createDirectoryAtPath:dataFileFolder withIntermediateDirectories:YES attributes:nil error:nil];
     }
     NSString *dataFileName = [dataFileFolder stringByAppendingPathComponent:[self cachedFileNameForKey:_url.absoluteString]];
+    NSString *fileName = file ? file : dataFileName;
     if ([manager fileExistsAtPath:dataFileName]) {
+        NSMutableData *existData = [NSMutableData dataWithContentsOfFile:dataFileName];
         [manager removeItemAtPath:dataFileName error:nil];
+        [existData appendData:data];
+        [existData writeToFile:fileName atomically:YES];
     }
-    [data writeToFile:dataFileName atomically:YES];
+    [data writeToFile:fileName atomically:YES];
 }
 
-- (void)removeResumeData
+- (void)removeTotalReceivedData
 {
     NSString *cachesPath = [NSSearchPathForDirectoriesInDomains(NSCachesDirectory, NSUserDomainMask, YES) firstObject];
     NSString *dataFile = [NSString stringWithFormat:@"%@/%@/%@", cachesPath, KTDownloadModelsDataPath, _url.absoluteString];
     NSFileManager *manager = [NSFileManager defaultManager];
     [manager removeItemAtPath:dataFile error:nil];
+}
+
+- (void)setDownloadFilePath:(NSString *)downloadFilePath
+{
+    NSString *docPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject];
+    NSString *cachesPath = [NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES) firstObject];
+    BOOL pathCorrect = [downloadFilePath hasPrefix:docPath] || [downloadFilePath hasPrefix:cachesPath];
+    NSAssert(pathCorrect, @"downloadFilePath必须是处于Documents或者Library/Caches文件夹下");
+    _downloadFilePath = downloadFilePath;
 }
 
 - (void)setState:(KTDownloadState)state
@@ -122,14 +145,14 @@ static NSString * const KTDownloadModelsDataPath = @"com.KTDownloadManager.defau
     }
 }
 
-- (void)setReceivedBytes:(int64_t)receivedBytes
+- (void)setTotalReceivedBytes:(int64_t)totalReceivedBytes
 {
-    if (_receivedBytes == receivedBytes) {
+    if (_totalReceivedBytes == totalReceivedBytes) {
         return;
     }
-    _receivedBytes = receivedBytes;
-    if ([self.delegate respondsToSelector:@selector(downloadModel:didReceivedBytes:totalBytes:)]) {
-        [self.delegate downloadModel:self didReceivedBytes:receivedBytes totalBytes:_totalBytes];
+    _totalReceivedBytes = totalReceivedBytes;
+    if ([self.delegate respondsToSelector:@selector(downloadModel:didReceivedTotalBytes:totalBytes:)]) {
+        [self.delegate downloadModel:self didReceivedTotalBytes:totalReceivedBytes totalBytes:_totalBytes];
     }
 }
 
